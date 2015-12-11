@@ -71,11 +71,13 @@ function bindTouchHandler(element, i, supportsTouch, supportsIePointer) {
     }
   }
   function shouldHandle(e) {
-    if (e.targetTouches && e.targetTouches.length === 1) {
-      return true;
-    }
-    if (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== e.MSPOINTER_TYPE_MOUSE) {
-      return true;
+    if (!i.settings.preventScroll || !i.settings.preventScroll()) {
+      if (e.targetTouches && e.targetTouches.length === 1) {
+        return true;
+      }
+      if (e.pointerType && e.pointerType !== 'mouse' && e.pointerType !== e.MSPOINTER_TYPE_MOUSE) {
+        return true;
+      }
     }
     return false;
   }
@@ -124,11 +126,27 @@ function bindTouchHandler(element, i, supportsTouch, supportsIePointer) {
       }
     }
   }
+
+  function touchScrollEndEventCallback() {
+    if (instances.get(element).settings.onTouchScrollEnd) {
+      instances.get(element).settings.onTouchScrollEnd({
+        element: element,
+        speed: speed
+      });
+    }
+  }
+
   function touchEnd() {
     if (!inGlobalTouch && inLocalTouch) {
       inLocalTouch = false;
 
       clearInterval(easingLoop);
+
+      if (instances.get(element) && instances.get(element).settings.suppressInertia) {
+        touchScrollEndEventCallback();
+        return;
+      }
+
       easingLoop = setInterval(function () {
         if (!instances.get(element)) {
           clearInterval(easingLoop);
@@ -137,6 +155,7 @@ function bindTouchHandler(element, i, supportsTouch, supportsIePointer) {
 
         if (Math.abs(speed.x) < 0.01 && Math.abs(speed.y) < 0.01) {
           clearInterval(easingLoop);
+          touchScrollEndEventCallback();
           return;
         }
 
