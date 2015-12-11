@@ -12,6 +12,15 @@ function bindMouseWheelHandler(element, i) {
 
   function shouldPreventDefault(deltaX, deltaY) {
     var scrollTop = element.scrollTop;
+
+    // if we allow scrolling only in one axis then allow event to propagate if it's not mainly on axis we're interested in
+    // that fixes bad scrolling with macbook touchpad
+    var magnitudeX = Math.abs(deltaX);
+    var magnitudeY = Math.abs(deltaY);
+    if ((magnitudeY > magnitudeX && i.settings.suppressScrollY) || (magnitudeX > magnitudeY && i.settings.suppressScrollX)) {
+      return false;
+    }
+
     if (deltaX === 0) {
       if (!i.scrollbarYActive) {
         return false;

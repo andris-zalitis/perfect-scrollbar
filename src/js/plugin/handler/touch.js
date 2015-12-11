@@ -15,6 +15,10 @@ function bindTouchHandler(element, i, supportsTouch, supportsIePointer) {
     var magnitudeY = Math.abs(deltaY);
 
     if (magnitudeY > magnitudeX) {
+      if (i.settings.suppressScrollY) {
+        return false;
+      }
+
       // user is perhaps trying to swipe up/down the page
 
       if (((deltaY < 0) && (scrollTop === i.contentHeight - i.containerHeight)) ||
@@ -22,6 +26,10 @@ function bindTouchHandler(element, i, supportsTouch, supportsIePointer) {
         return !i.settings.swipePropagation;
       }
     } else if (magnitudeX > magnitudeY) {
+      if (i.settings.suppressScrollX) {
+        return false;
+      }
+
       // user is perhaps trying to swipe left/right across the page
 
       if (((deltaX < 0) && (scrollLeft === i.contentWidth - i.containerWidth)) ||
